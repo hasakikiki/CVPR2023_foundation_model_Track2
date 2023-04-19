@@ -2,7 +2,7 @@ OneForAll/data/datasets/train
 OneForAll/data/datasets/val
 OneForAll/data/datasets/test
 
-OneForAll/resource
+OneForAll/pretrained
 
 OneForAll/logs/*.log
 
