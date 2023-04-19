@@ -5,5 +5,11 @@ OneForAll/data/datasets/test
 OneForAll/pretrained
 
 OneForAll/logs/*.log
+OneForAll/logs/train
+OneForAll/logs/infer
 
 OneForAll/scripts/slurm*
+
+**/__pycache__
+
+OneForAll/outputs
