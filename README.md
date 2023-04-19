@@ -42,7 +42,7 @@ conda activate paddle
 
 ## 机器环境
 
-按照规范，运行项目需要在登录节点使用`slurm`提交任务，`slurm`使用方法可以自行搜索。项目提供了一个提交任务的示例`OneForAll/scripts/test.slurm`，提交测试：
+按照规范，运行项目需要在登录节点使用`slurm`提交任务，`slurm`使用方法参考[这里](https://hpc.pku.edu.cn/_book/guide/slurm/sbatch.html)。项目提供了一个提交任务的示例`OneForAll/scripts/test.slurm`，提交测试：
 
 ```bash
 sbatch OneForAll/scripts/test.slurm
