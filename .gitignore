@@ -3,3 +3,5 @@ OneForAll/data/datasets/val
 OneForAll/data/datasets/test
 
 OneForAll/resource
+
+OneForAll/logs/*.log
