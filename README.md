@@ -49,3 +49,7 @@ sbatch OneForAll/scripts/test.slurm
 ```
 
 测试结果记录在`logs/slurm_test_result.log`，检查无误后环境配置成功。
+
+## 项目启动
+
+参考[Track2 Codebase](OneForAll/README_ch.md)
