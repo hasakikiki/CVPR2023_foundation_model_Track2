@@ -5,3 +5,5 @@ OneForAll/data/datasets/test
 OneForAll/resource
 
 OneForAll/logs/*.log
+
+OneForAll/scripts/slurm*
