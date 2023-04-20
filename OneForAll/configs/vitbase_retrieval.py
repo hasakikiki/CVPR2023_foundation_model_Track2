@@ -96,7 +96,7 @@ train.amp.enabled = False
 # data settings
 sample_num = 136117     #训练集样本量
 epochs=20
-dataloader.train.task_loaders.retrieval.total_batch_size = 128 * 8
+dataloader.train.task_loaders.retrieval.total_batch_size = 128 * 4
 
 iters_per_epoch = sample_num // dataloader.train.task_loaders.retrieval.total_batch_size
 
