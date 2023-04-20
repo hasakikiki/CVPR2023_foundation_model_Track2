@@ -94,7 +94,10 @@ optimizer = L(build_lr_optimizer_lazy)(
 train.amp.enabled = False
 
 # data settings
-sample_num = 136117     #训练集样本量
+import subprocess
+train_out = subprocess.getoutput("wc -l data/datasets/train/train_label.txt")
+# val_out = subprocess.getoutput("wc -l data/datasets/val/val_label.txt")
+sample_num = int(train_out.split()[0])     #训练集样本量
 epochs=20
 dataloader.train.task_loaders.retrieval.total_batch_size = 128 * 4
 
