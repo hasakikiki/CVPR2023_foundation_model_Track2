@@ -1,4 +1,5 @@
 # !/usr/bin/env python3
+import argparse
 import json
 import numpy as np
 from collections import OrderedDict
@@ -130,7 +131,7 @@ def get_similarity(images, texts):
     return similarity
 
 
-def infer(similarity, idx_dic, texts):
+def infer(similarity, idx_dic, texts, data_type):
     similarity_argsort = np.argsort(-similarity, axis=1)
     print('similarity_argsort.shape', similarity_argsort.shape)
 
@@ -141,17 +142,19 @@ def infer(similarity, idx_dic, texts):
         for j in range(topk):
             dic['image_names'].append(idx_dic[similarity_argsort[i,j]])
         result_list.append(dic)
-    with open('infer_json.json', 'w') as f:
+    with open(f'infer_json_{data_type}.json', 'w') as f:
         f.write(json.dumps({'results': result_list}, indent=4))
-        
 
 
 if __name__ == '__main__':
-    # pretrained = './pretrained/vitbase_clip.pdparams'
-    pretrained = "./outputs/vitbase_retrieval/model_final.pdmodel"
-    images_root = './data/datasets/test/test_images/'
-    texts_root = './data/datasets/test/test_text.txt' 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data-type', type=str)
+    args = parser.parse_args()
 
+    # pretrained = './pretrained/vitbase_clip.pdparams'
+    pretrained = f"./outputs/{args.data_type}/model_final.pdmodel"
+    images_root = f'./data/datasets/{args.data_type}/test/test_images/'
+    texts_root = f'./data/datasets/{args.data_type}/test/test_text.txt' 
 
     model = build_model(embed_dim=512,
                         image_resolution=224,
@@ -176,4 +179,4 @@ if __name__ == '__main__':
 
     similarity = get_similarity(images, texts)
 
-    infer(similarity, idx_dic, texts)
+    infer(similarity, idx_dic, texts, args.data_type)

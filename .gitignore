@@ -1,12 +1,12 @@
 OneForAll/data/datasets/train
 OneForAll/data/datasets/val
 OneForAll/data/datasets/test
+OneForAll/data/datasets/vehicle
+OneForAll/data/datasets/pedestrian
 
 OneForAll/pretrained
 
-OneForAll/logs/*.log
-OneForAll/logs/train
-OneForAll/logs/infer
+OneForAll/logs
 
 OneForAll/scripts/slurm*
 
@@ -14,4 +14,4 @@ OneForAll/scripts/slurm*
 
 OneForAll/outputs
 
-OneForAll/infer_json.json
+OneForAll/*.json
