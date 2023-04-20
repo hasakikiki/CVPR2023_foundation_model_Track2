@@ -13,3 +13,5 @@ OneForAll/scripts/slurm*
 **/__pycache__
 
 OneForAll/outputs
+
+OneForAll/infer_json.json
