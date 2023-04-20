@@ -149,8 +149,8 @@ def infer(similarity, idx_dic, texts):
 if __name__ == '__main__':
     # pretrained = './pretrained/vitbase_clip.pdparams'
     pretrained = "./outputs/vitbase_retrieval/model_final.pdmodel"
-    images_root = './datasets/test/test_images/'
-    texts_root = './datasets/test/test_text.txt' 
+    images_root = './data/datasets/test/test_images/'
+    texts_root = './data/datasets/test/test_text.txt' 
 
 
     model = build_model(embed_dim=512,
