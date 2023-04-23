@@ -5,6 +5,7 @@ import json
 import random
 import stanza
 import re
+import itertools
 from PIL import Image
 from collections import defaultdict
 from tqdm import tqdm
@@ -116,44 +117,46 @@ def aug_vehicle_text():
 
 def process(lines, pos_path, save_path, thread_idx):
     aug_res = defaultdict(list)
+    pos_res = defaultdict(str)
     pos = stanza.Pipeline('en', processors='tokenize,pos', download_method=None, use_gpu=False)
     keep_type = set({'NOUN', 'ADJ', 'NUM', 'SYM', 'PUNCT', 'VERB', 'ADP', 'ADV', 'PROPN'})
-    with open(pos_path, 'w') as f_w:
-        for line in tqdm(lines, desc=f'thread {thread_idx}'):
-            line = line.strip().rsplit('$', 1)
-            candidate = []
-            for sent in pos(line[1]).to_dict():
-                for word in sent:
-                    if word['upos'] not in keep_type:
-                        candidate.append((word['start_char'], word['end_char']))
-                    f_w.write(word['text'] + '|' + word['upos'] + ' ')
-            f_w.write('\n')
-            descriptions = set()
-            while len(descriptions) < 2:
-                if len(candidate) == 0:
-                    break
-                delete_list = random.sample(candidate, k=max(1, len(candidate) // 5))
-                delete_list = sorted(delete_list, key=lambda x: x[0])
-                description = line[1][:delete_list[0][0]]
-                for i in range(1, len(delete_list)):
-                    description += line[1][delete_list[i-1][1]:delete_list[i][0]]
-                description += line[1][delete_list[-1][1]:]
-                description = re.sub(r'\s+', ' ', description)
-                descriptions.add(description)
-                if len(candidate) == 1:
-                    break
-            aug_res[line[1]].append(line[1])
-            for description in descriptions:
-                aug_res[line[1]].append(description)
+    for line in tqdm(lines, desc=f'thread {thread_idx}'):
+        line = line.strip().rsplit('$', 1)
+        if line[1] in aug_res:
+            continue
+        candidate = []
+        for sent in pos(line[1]).to_dict():
+            for word in sent:
+                if word['upos'] not in keep_type:
+                    candidate.append((word['start_char'], word['end_char']))
+                pos_res[line[1]] += word['text'] + '|' + word['upos'] + ' '
+        if len(candidate) < 5:
+            delete_lists = (candidate,)
+        else:
+            delete_lists = itertools.combinations(candidate, 5)
+        descriptions = []
+        for delete_list in delete_lists:
+            delete_list = sorted(delete_list, key=lambda x: x[0])
+            description = line[1][:delete_list[0][0]]
+            for i in range(1, len(delete_list)):
+                description += line[1][delete_list[i-1][1]:delete_list[i][0]]
+            description += line[1][delete_list[-1][1]:]
+            description = re.sub(r'\s+', ' ', description)
+            descriptions.append(description)
+        aug_res[line[1]].append(line[1])
+        for description in descriptions:
+            aug_res[line[1]].append(description)
     with open(save_path, 'w') as f:
         json.dump(aug_res, f, indent=4)
+    with open(pos_path, 'w') as f:
+        json.dump(pos_res, f, indent=4)
 
 
 def aug_pedestrian_text():
     num_thread = 8
     save_path = 'OneForAll/data/datasets/pedestrian/train/aug_text.json'
     src_path = 'OneForAll/data/datasets/pedestrian/train/train_label_raw.txt'
-    pos_path = 'OneForAll/data/datasets/pedestrian/train/train_text_pos.txt'
+    pos_path = 'OneForAll/data/datasets/pedestrian/train/train_text_pos.json'
     import subprocess
     num_sample = int(subprocess.getoutput(f"wc -l {src_path}").split()[0])
     num_sample_per_t = num_sample // num_thread
@@ -165,7 +168,7 @@ def aug_pedestrian_text():
         for idx, line in enumerate(f):
             t_samples.append(line)
             if (len(t_samples) == num_sample_per_t and t_idx < num_thread-1) or idx == num_sample-1:
-                t = Thread(target=process, args=(t_samples, pos_path + f'_{t_idx}.txt', save_path + f'_{t_idx}.json', t_idx))
+                t = Thread(target=process, args=(t_samples, pos_path + f'_{t_idx}.json', save_path + f'_{t_idx}.json', t_idx))
                 t.start()
                 t_list.append(t)
                 num_processed += len(t_samples)
@@ -175,19 +178,20 @@ def aug_pedestrian_text():
     for t in t_list:
         t.join()
     aug_res = dict()
-    if os.path.exists(pos_path):
-        os.remove(pos_path)
+    pos_res = dict()
     for t_idx in range(num_thread):
         with open(save_path + f'_{t_idx}.json', 'r') as f:
             t_aug_res = json.load(f)
             aug_res = {**aug_res, **t_aug_res}
-        with open(pos_path + f'_{t_idx}.txt', 'r') as f, open(pos_path, 'a') as f_w:
-            for line in f:
-                f_w.write(line)
+        with open(pos_path + f'_{t_idx}.json', 'r') as f:
+            t_pos_res = json.load(f)
+            pos_res = {**pos_res, **t_pos_res}
         os.remove(save_path + f'_{t_idx}.json')
-        os.remove(pos_path + f'_{t_idx}.txt')
+        os.remove(pos_path + f'_{t_idx}.json')
     with open(save_path, 'w') as f:
         json.dump(aug_res, f, indent=4)
+    with open(pos_path, 'w') as f:
+        json.dump(pos_res, f, indent=4)
 
 
 def merge_aug_result(data_type):
@@ -201,7 +205,8 @@ def merge_aug_result(data_type):
         for line in f:
             line = line.strip().split('$')
             for aug_image in aug_image_dict[line[0]][::-1]:
-                for aug_text in aug_text_dict[line[2]]:
+                selected = aug_text_dict[line[2]] if len(aug_text_dict[line[2]] <= 4) else random.sample(aug_text_dict[line[2]], k=4)
+                for aug_text in selected:
                     f_w.write(aug_image + '$' + line[1] + '$' + aug_text + '\n')
 
 
