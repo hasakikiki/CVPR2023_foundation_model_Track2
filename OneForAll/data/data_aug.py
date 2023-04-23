@@ -205,7 +205,7 @@ def merge_aug_result(data_type):
         for line in f:
             line = line.strip().split('$')
             for aug_image in aug_image_dict[line[0]][::-1]:
-                selected = aug_text_dict[line[2]] if len(aug_text_dict[line[2]] <= 4) else random.sample(aug_text_dict[line[2]], k=4)
+                selected = aug_text_dict[line[2]] if len(aug_text_dict[line[2]]) <= 4 else random.sample(aug_text_dict[line[2]], k=4)
                 for aug_text in selected:
                     f_w.write(aug_image + '$' + line[1] + '$' + aug_text + '\n')
 
