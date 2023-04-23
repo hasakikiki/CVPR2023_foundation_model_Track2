@@ -177,7 +177,7 @@ def aug_pedestrian_text():
     aug_res = dict()
     if os.path.exists(pos_path):
         os.remove(pos_path)
-    for t_idx in range(num_sample):
+    for t_idx in range(num_thread):
         with open(save_path + f'_{t_idx}.json', 'r') as f:
             t_aug_res = json.load(f)
             aug_res = {**aug_res, **t_aug_res}
