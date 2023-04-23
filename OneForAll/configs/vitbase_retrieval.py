@@ -14,7 +14,7 @@ from data.build_retrieval import  build_retrieval_dataset, \
 from solver.build import build_lr_optimizer_lazy, build_lr_scheduler_lazy
     
 
-data_type = 'pedestrian'
+data_type = 'vehicle'
 
 dataloader=OmegaConf.create()
 _root = f"data/datasets/{data_type}"
@@ -100,8 +100,8 @@ import subprocess
 train_out = subprocess.getoutput(f"wc -l data/datasets/{data_type}/train/train_label.txt")
 # val_out = subprocess.getoutput("wc -l data/datasets/val/val_label.txt")
 sample_num = int(train_out.split()[0])     #训练集样本量
-epochs=20
-dataloader.train.task_loaders.retrieval.total_batch_size = 128 * 8
+epochs=10
+dataloader.train.task_loaders.retrieval.total_batch_size = 128 * 2
 
 iters_per_epoch = sample_num // dataloader.train.task_loaders.retrieval.total_batch_size
 
